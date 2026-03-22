@@ -4,6 +4,35 @@ import { useState } from "react";
 
 export default function Contact() {
   const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setSending(true);
+    setError("");
+
+    const form = e.currentTarget;
+    const data = new FormData(form);
+
+    try {
+      const res = await fetch("https://formsubmit.co/ajax/jobtech@jobfluent.org", {
+        method: "POST",
+        headers: { Accept: "application/json" },
+        body: data,
+      });
+
+      if (res.ok) {
+        setSubmitted(true);
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
+    } catch {
+      setError("Network error. Please try again.");
+    } finally {
+      setSending(false);
+    }
+  }
 
   return (
     <section id="contact" className="py-20 px-6 bg-surface">
@@ -30,11 +59,10 @@ export default function Contact() {
           ) : (
             <form
               className="bg-white border border-border rounded-xl p-8 space-y-5"
-              onSubmit={(e) => {
-                e.preventDefault();
-                setSubmitted(true);
-              }}
+              onSubmit={handleSubmit}
             >
+              <input type="hidden" name="_subject" value="New AI Consultation Request" />
+              <input type="hidden" name="_captcha" value="false" />
               <div>
                 <label
                   htmlFor="name"
@@ -45,6 +73,7 @@ export default function Contact() {
                 <input
                   type="text"
                   id="name"
+                  name="name"
                   required
                   className="w-full border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
                   placeholder="Your name"
@@ -60,6 +89,7 @@ export default function Contact() {
                 <input
                   type="email"
                   id="email"
+                  name="email"
                   required
                   className="w-full border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
                   placeholder="you@company.com"
@@ -75,6 +105,7 @@ export default function Contact() {
                 <input
                   type="text"
                   id="company"
+                  name="company"
                   className="w-full border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
                   placeholder="Your company (optional)"
                 />
@@ -88,17 +119,22 @@ export default function Contact() {
                 </label>
                 <textarea
                   id="message"
+                  name="message"
                   rows={4}
                   required
                   className="w-full border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent resize-none"
                   placeholder="Tell me about your business and what you'd like to explore..."
                 />
               </div>
+              {error && (
+                <p className="text-red-600 text-sm">{error}</p>
+              )}
               <button
                 type="submit"
-                className="w-full bg-accent text-white py-3 rounded-lg text-sm font-medium hover:bg-accent-dark transition-colors"
+                disabled={sending}
+                className="w-full bg-accent text-white py-3 rounded-lg text-sm font-medium hover:bg-accent-dark transition-colors disabled:opacity-50"
               >
-                Book Free Discovery Call
+                {sending ? "Sending..." : "Book Free Discovery Call"}
               </button>
             </form>
           )}
