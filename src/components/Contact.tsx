@@ -13,13 +13,13 @@ export default function Contact() {
     setError("");
 
     const form = e.currentTarget;
-    const data = new FormData(form);
+    const data = Object.fromEntries(new FormData(form));
 
     try {
-      const res = await fetch("https://formsubmit.co/ajax/jobtech@jobfluent.org", {
+      const res = await fetch("/api/contact", {
         method: "POST",
-        headers: { Accept: "application/json" },
-        body: data,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
       });
 
       if (res.ok) {
@@ -61,8 +61,6 @@ export default function Contact() {
               className="bg-white border border-border rounded-xl p-8 space-y-5"
               onSubmit={handleSubmit}
             >
-              <input type="hidden" name="_subject" value="New AI Consultation Request" />
-              <input type="hidden" name="_captcha" value="false" />
               <div>
                 <label
                   htmlFor="name"
